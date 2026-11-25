@@ -1,9 +1,14 @@
 import unittest
 
 from src.linear_probing_hash_table import LinearProbingHashTable
+from tests.test_hash_table import HashTableContract
 
 
-class LinearProbingHashTableTests(unittest.TestCase):
+class LinearProbingHashTableTests(HashTableContract, unittest.TestCase):
+    """Runs the shared hash table tests plus linear-probing-only cases."""
+
+    make_table = LinearProbingHashTable
+
     def test_collisions_wrap_from_last_slot_to_zero(self):
         table: LinearProbingHashTable[str] = LinearProbingHashTable(
             capacity=5, max_load=None
@@ -16,6 +21,7 @@ class LinearProbingHashTableTests(unittest.TestCase):
         self.assertEqual(table.snapshot_slots()[0], ("h", "second"))
         self.assertEqual(table.snapshot_slots()[1], ("m", "third"))
         self.assertEqual(table.probe_indices("m"), (4, 0, 1))
+        self.assertEqual(table.find("m"), ("third", 3))
 
     def test_full_table_supports_updates_and_missing_lookups(self):
         table: LinearProbingHashTable[str] = LinearProbingHashTable(
@@ -28,6 +34,8 @@ class LinearProbingHashTableTests(unittest.TestCase):
         self.assertEqual(len(table), 5)
         self.assertEqual(table.get("not-present"), None)
         self.assertEqual(len(table.probe_indices("not-present")), 5)
+        self.assertEqual(table.find("not-present"), (None, 5))
+        self.assertEqual(table.load_factor(), 1.0)
         with self.assertRaises(OverflowError):
             table.put("new-key", "new-value")
 
