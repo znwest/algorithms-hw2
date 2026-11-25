@@ -1,6 +1,7 @@
 """HTTP interface for the in-memory URL shortener."""
 
 import argparse
+import errno
 import html
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
@@ -376,7 +377,16 @@ def main() -> None:
         HashTable if args.table == "chaining" else LinearProbingHashTable
     )
     shortener.configure_table_type(table_class)
-    server = create_server(args.host, args.port)
+    try:
+        server = create_server(args.host, args.port)
+    except OSError as error:
+        if error.errno != errno.EADDRINUSE:
+            raise
+        parser.error(
+            f"포트 {args.port}은 이미 사용 중입니다. 이전 서버 터미널에서 "
+            "Ctrl+C로 종료하거나 다른 포트를 사용하세요 "
+            f"(예: make serve PORT=8001 TABLE={args.table})."
+        )
     display_host = "127.0.0.1" if args.host == DEFAULT_HOST else args.host
     print(f"Serving on http://{display_host}:{server.server_port}", flush=True)
     try:

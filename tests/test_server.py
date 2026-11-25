@@ -1,12 +1,21 @@
 import http.client
+from contextlib import redirect_stderr
+import io
 import importlib
 from http.server import HTTPServer
 import json
+import sys
 from threading import Thread
 import unittest
+from unittest.mock import patch
 
 from src import shortener
-from src.server import DEFAULT_HOST, ShortenerRequestHandler, create_server
+from src.server import (
+    DEFAULT_HOST,
+    ShortenerRequestHandler,
+    create_server,
+    main,
+)
 
 
 class ServerTests(unittest.TestCase):
@@ -16,6 +25,29 @@ class ServerTests(unittest.TestCase):
             self.assertEqual(server.server_address[0], DEFAULT_HOST)
         finally:
             server.server_close()
+
+    def test_port_conflict_suggests_stopping_or_changing_port(self):
+        occupied_server = create_server(port=0)
+        port = occupied_server.server_port
+        stderr = io.StringIO()
+        try:
+            with (
+                patch.object(
+                    sys,
+                    "argv",
+                    ["server", "--port", str(port), "--table", "linear"],
+                ),
+                redirect_stderr(stderr),
+                self.assertRaises(SystemExit) as raised,
+            ):
+                main()
+        finally:
+            occupied_server.server_close()
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("이미 사용 중", stderr.getvalue())
+        self.assertIn("Ctrl+C", stderr.getvalue())
+        self.assertIn("make serve PORT=8001 TABLE=linear", stderr.getvalue())
 
     def setUp(self):
         importlib.reload(shortener)
