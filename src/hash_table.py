@@ -9,8 +9,16 @@ ValueT = TypeVar("ValueT")
 class HashTable(Generic[ValueT]):
     """Store values under string keys with dynamically resized buckets."""
 
-    def __init__(self) -> None:
-        self._capacity = 8
+    def __init__(
+        self, capacity: int = 8, max_load: float | None = 0.75
+    ) -> None:
+        if capacity < 1:
+            raise ValueError("capacity must be positive")
+        if max_load is not None and max_load <= 0:
+            raise ValueError("max_load must be positive or None")
+
+        self._capacity = capacity
+        self._max_load = max_load
         self._buckets: list[list[tuple[str, ValueT]]] = [
             [] for _ in range(self._capacity)
         ]
@@ -39,7 +47,10 @@ class HashTable(Generic[ValueT]):
 
         self._buckets[self._bucket_index(key)].append((key, value))
         self._size += 1
-        if self._size * 4 > self._capacity * 3:
+        if (
+            self._max_load is not None
+            and self._size > self._capacity * self._max_load
+        ):
             self._resize()
 
     def _resize(self) -> None:
