@@ -6,10 +6,17 @@ from threading import Thread
 import unittest
 
 from src import shortener
-from src.server import ShortenerRequestHandler
+from src.server import DEFAULT_HOST, ShortenerRequestHandler, create_server
 
 
 class ServerTests(unittest.TestCase):
+    def test_public_server_default_binds_all_interfaces(self):
+        server = create_server(port=0)
+        try:
+            self.assertEqual(server.server_address[0], DEFAULT_HOST)
+        finally:
+            server.server_close()
+
     def setUp(self):
         importlib.reload(shortener)
         self.server = HTTPServer(("127.0.0.1", 0), ShortenerRequestHandler)
