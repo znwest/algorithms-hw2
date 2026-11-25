@@ -76,3 +76,7 @@ class HashTable(Generic[ValueT]):
 
     def __len__(self) -> int:
         return self._size
+
+    def snapshot_buckets(self) -> tuple[tuple[tuple[str, ValueT], ...], ...]:
+        """Return an immutable snapshot of the bucket chains."""
+        return tuple(tuple(bucket) for bucket in self._buckets)

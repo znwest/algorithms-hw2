@@ -66,3 +66,8 @@ def expand(code: object) -> str:
     if url is None:
         raise KeyError(code)
     return url
+
+
+def url_table_snapshot() -> tuple[tuple[tuple[str, str], ...], ...]:
+    """Return a read-only snapshot of the URL-to-code table's bucket chains."""
+    return _url_to_code.snapshot_buckets()
