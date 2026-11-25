@@ -9,6 +9,9 @@ from urllib.parse import urlsplit
 from src import shortener
 
 
+DEFAULT_HOST = "0.0.0.0"
+
+
 HOME_PAGE = """<!doctype html>
 <html lang="ko">
 <head>
@@ -275,13 +278,19 @@ class ShortenerRequestHandler(BaseHTTPRequestHandler):
         )
 
 
+def create_server(host: str = DEFAULT_HOST, port: int = 8000) -> HTTPServer:
+    return HTTPServer((host, port), ShortenerRequestHandler)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the URL shortener.")
+    parser.add_argument("--host", default=DEFAULT_HOST)
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
 
-    server = HTTPServer(("127.0.0.1", args.port), ShortenerRequestHandler)
-    print(f"Serving on http://127.0.0.1:{server.server_port}", flush=True)
+    server = create_server(args.host, args.port)
+    display_host = "127.0.0.1" if args.host == DEFAULT_HOST else args.host
+    print(f"Serving on http://{display_host}:{server.server_port}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
