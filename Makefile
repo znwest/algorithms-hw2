@@ -18,7 +18,7 @@ test:
 	@python3 -m unittest discover -s tests -v
 
 serve:
-	@python3 src/server.py --port $(PORT)
+	@python3 -m src.server --port $(PORT)
 
 experiment:
 	@python3 -m experiments.probe_experiment
