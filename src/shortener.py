@@ -4,11 +4,37 @@ from urllib.parse import urlparse
 
 from src.base62 import encode
 from src.hash_table import HashTable
+from src.linear_probing_hash_table import LinearProbingHashTable
 
 
-_url_to_code: HashTable[str] = HashTable()
-_code_to_url: HashTable[str] = HashTable()
-_next_identifier = 0
+TableClass = type[HashTable[str]] | type[LinearProbingHashTable[str]]
+
+_url_to_code: HashTable[str] | LinearProbingHashTable[str]
+_code_to_url: HashTable[str] | LinearProbingHashTable[str]
+_chain_view: HashTable[str]
+_linear_view: LinearProbingHashTable[str]
+_next_identifier: int
+
+
+def configure_table_type(table_class: TableClass = HashTable) -> None:
+    """Reset the shortener and select its URL/code table implementation."""
+    global _url_to_code, _code_to_url, _chain_view, _linear_view
+    global _next_identifier
+
+    if table_class not in (HashTable, LinearProbingHashTable):
+        raise TypeError("table_class must be a supported hash table class")
+
+    _url_to_code = table_class()
+    _code_to_url = table_class()
+    _chain_view = (
+        _url_to_code if table_class is HashTable else HashTable()
+    )
+    _linear_view = (
+        _url_to_code
+        if table_class is LinearProbingHashTable
+        else LinearProbingHashTable()
+    )
+    _next_identifier = 0
 
 
 def _normalize_and_validate(url: object) -> str:
@@ -55,6 +81,10 @@ def shorten(url: object) -> tuple[str, bool]:
     _next_identifier += 1
     _url_to_code.put(normalized, code)
     _code_to_url.put(code, normalized)
+    if _chain_view is not _url_to_code:
+        _chain_view.put(normalized, code)
+    if _linear_view is not _url_to_code:
+        _linear_view.put(normalized, code)
     return code, True
 
 
@@ -69,5 +99,18 @@ def expand(code: object) -> str:
 
 
 def url_table_snapshot() -> tuple[tuple[tuple[str, str], ...], ...]:
-    """Return a read-only snapshot of the URL-to-code table's bucket chains."""
-    return _url_to_code.snapshot_buckets()
+    """Return a read-only snapshot of the separate-chaining URL table."""
+    return _chain_view.snapshot_buckets()
+
+
+def linear_table_snapshot() -> tuple[tuple[str, str] | None, ...]:
+    """Return a read-only snapshot of the linear-probing URL table."""
+    return _linear_view.snapshot_slots()
+
+
+def linear_probe_indices(key: str) -> tuple[int, ...]:
+    """Return the slots inspected when finding key in the linear-probing view."""
+    return _linear_view.probe_indices(key)
+
+
+configure_table_type()

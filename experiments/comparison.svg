@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560">
+<title>Separate chaining and linear probing comparison</title>
+<rect width="100%" height="100%" fill="white"/>
+<g font-family="sans-serif" fill="#222">
+<text x="480.0" y="28" text-anchor="middle" font-size="20">Probe counts by collision strategy</text>
+<line x1="82" y1="485.0" x2="930" y2="485.0" stroke="#ddd"/>
+<text x="70" y="490.0" text-anchor="end" font-size="12">0</text>
+<line x1="82" y1="399.0" x2="930" y2="399.0" stroke="#ddd"/>
+<text x="70" y="404.0" text-anchor="end" font-size="12">9</text>
+<line x1="82" y1="313.0" x2="930" y2="313.0" stroke="#ddd"/>
+<text x="70" y="318.0" text-anchor="end" font-size="12">18</text>
+<line x1="82" y1="227.0" x2="930" y2="227.0" stroke="#ddd"/>
+<text x="70" y="232.0" text-anchor="end" font-size="12">27</text>
+<line x1="82" y1="141.0" x2="930" y2="141.0" stroke="#ddd"/>
+<text x="70" y="146.0" text-anchor="end" font-size="12">36</text>
+<line x1="82" y1="55.0" x2="930" y2="55.0" stroke="#ddd"/>
+<text x="70" y="60.0" text-anchor="end" font-size="12">45</text>
+<line x1="82.0" y1="55" x2="82.0" y2="485" stroke="#eee"/>
+<text x="82.0" y="505" text-anchor="middle" font-size="10">0.0</text>
+<line x1="166.8" y1="55" x2="166.8" y2="485" stroke="#eee"/>
+<text x="166.8" y="505" text-anchor="middle" font-size="10">0.1</text>
+<line x1="251.6" y1="55" x2="251.6" y2="485" stroke="#eee"/>
+<text x="251.6" y="505" text-anchor="middle" font-size="10">0.2</text>
+<line x1="336.4" y1="55" x2="336.4" y2="485" stroke="#eee"/>
+<text x="336.4" y="505" text-anchor="middle" font-size="10">0.3</text>
+<line x1="421.2" y1="55" x2="421.2" y2="485" stroke="#eee"/>
+<text x="421.2" y="505" text-anchor="middle" font-size="10">0.4</text>
+<line x1="506.0" y1="55" x2="506.0" y2="485" stroke="#eee"/>
+<text x="506.0" y="505" text-anchor="middle" font-size="10">0.5</text>
+<line x1="590.8" y1="55" x2="590.8" y2="485" stroke="#eee"/>
+<text x="590.8" y="505" text-anchor="middle" font-size="10">0.6</text>
+<line x1="675.6" y1="55" x2="675.6" y2="485" stroke="#eee"/>
+<text x="675.6" y="505" text-anchor="middle" font-size="10">0.7</text>
+<line x1="760.4" y1="55" x2="760.4" y2="485" stroke="#eee"/>
+<text x="760.4" y="505" text-anchor="middle" font-size="10">0.8</text>
+<line x1="845.2" y1="55" x2="845.2" y2="485" stroke="#eee"/>
+<text x="845.2" y="505" text-anchor="middle" font-size="10">0.9</text>
+<line x1="930.0" y1="55" x2="930.0" y2="485" stroke="#eee"/>
+<text x="930.0" y="505" text-anchor="middle" font-size="10">1.0</text>
+<line x1="82" y1="55" x2="82" y2="485" stroke="#333"/>
+<line x1="82" y1="485" x2="930" y2="485" stroke="#333"/>
+<text x="506.0" y="540" text-anchor="middle" font-size="14">Load factor (α)</text>
+<text x="20" y="270.0" transform="rotate(-90 20 270.0)" text-anchor="middle" font-size="14">Average probes</text>
+<polyline points="166.7,474.9 251.7,474.6 336.4,474.1 421.2,473.6 505.9,473.1 590.8,472.6 675.6,472.1 760.3,471.6 845.3,471.1" fill="none" stroke="#1769aa" stroke-width="2"/>
+<line x1="710" y1="68" x2="740" y2="68" stroke="#1769aa" stroke-width="2"/>
+<text x="748" y="72" font-size="12">Chain success</text>
+<polyline points="166.7,474.9 251.7,474.5 336.4,473.5 421.2,472.3 505.9,470.9 590.8,468.5 675.6,464.9 760.3,458.1 845.3,434.8" fill="none" stroke="#1769aa" stroke-width="2" stroke-dasharray="6 4"/>
+<line x1="710" y1="88" x2="740" y2="88" stroke="#1769aa" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="748" y="92" font-size="12">Linear success</text>
+<polyline points="166.7,483.8 251.7,482.9 336.4,482.3 421.2,481.1 505.9,480.2 590.8,479.5 675.6,478.0 760.3,477.2 845.3,476.4" fill="none" stroke="#d1495b" stroke-width="2"/>
+<line x1="710" y1="108" x2="740" y2="108" stroke="#d1495b" stroke-width="2"/>
+<text x="748" y="112" font-size="12">Chain failure</text>
+<polyline points="166.7,473.9 251.7,472.7 336.4,470.6 421.2,466.7 505.9,462.3 590.8,454.3 675.6,431.0 760.3,377.0 845.3,60.3" fill="none" stroke="#d1495b" stroke-width="2" stroke-dasharray="6 4"/>
+<line x1="710" y1="128" x2="740" y2="128" stroke="#d1495b" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="748" y="132" font-size="12">Linear failure</text>
+</g>
+</svg>
