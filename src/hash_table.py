@@ -73,6 +73,18 @@ class HashTable(Generic[ValueT]):
         bucket, position = found
         return bucket[position][1]
 
+    def find(self, key: str) -> tuple[ValueT | None, int]:
+        """Return (value or None, number of chain nodes compared)."""
+        bucket = self._buckets[self._bucket_index(key)]
+        for comparisons, (stored_key, value) in enumerate(bucket, start=1):
+            if stored_key == key:
+                return value, comparisons
+        return None, len(bucket)
+
+    def load_factor(self) -> float:
+        """Return entries / capacity."""
+        return self._size / self._capacity
+
     def __contains__(self, key: object) -> bool:
         if not isinstance(key, str):
             return False

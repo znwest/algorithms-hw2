@@ -81,6 +81,18 @@ class LinearProbingHashTable(Generic[ValueT]):
             raise RuntimeError("located key is missing from its slot")
         return entry[1]
 
+    def find(self, key: str) -> tuple[ValueT | None, int]:
+        """Return (value or None, number of slots inspected)."""
+        indices = self.probe_indices(key)
+        entry = self._slots[indices[-1]]
+        if entry is not None and entry[0] == key:
+            return entry[1], len(indices)
+        return None, len(indices)
+
+    def load_factor(self) -> float:
+        """Return entries / capacity."""
+        return self._size / self._capacity
+
     def __contains__(self, key: object) -> bool:
         if not isinstance(key, str):
             return False
