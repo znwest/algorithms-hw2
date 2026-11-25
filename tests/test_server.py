@@ -90,6 +90,9 @@ class ServerTests(unittest.TestCase):
         self.assertIn("http://localhost:", page)
         self.assertIn("<details>", page)
         self.assertIn("mod 8", page)
+        self.assertIn('id="linear-probing-table"', page)
+        self.assertIn("선형 탐지 순서와 비교 근거 펼치기", page)
+        self.assertIn("mod 8 =", page)
         self.assertIn("&quot;&lt;tag&gt;&quot;", page)
 
     def test_invalid_payload_and_unknown_routes_have_expected_status(self):

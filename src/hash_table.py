@@ -6,6 +6,13 @@ from typing import Generic, TypeVar
 ValueT = TypeVar("ValueT")
 
 
+def _horner_hash(key: str, capacity: int) -> int:
+    index = 0
+    for character in key:
+        index = (index * 31 + ord(character)) % capacity
+    return index
+
+
 class HashTable(Generic[ValueT]):
     """Store values under string keys with dynamically resized buckets."""
 
@@ -25,10 +32,7 @@ class HashTable(Generic[ValueT]):
         self._size = 0
 
     def _bucket_index(self, key: str) -> int:
-        index = 0
-        for character in key:
-            index = (index * 31 + ord(character)) % self._capacity
-        return index
+        return _horner_hash(key, self._capacity)
 
     def _find(self, key: str) -> tuple[list[tuple[str, ValueT]], int] | None:
         bucket = self._buckets[self._bucket_index(key)]

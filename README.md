@@ -20,9 +20,11 @@
 | 파일 | 하는 일 |
 | --- | --- |
 | `SPEC.md` | 명세 틀. 에이전트가 초안을 쓰고 **본인이 고칩니다** |
-| `src/` · `tests/` · `experiments/` | 비어 있습니다. 수업에서 채웁니다 |
+| `src/` | 단축기, 체이닝·선형 탐지 테이블, HTTP 서버 |
+| `tests/` | 표준 `unittest` 테스트 |
+| `experiments/` | 탐지 횟수 실험과 결과 파일 |
 | `tools/catchup.sh` | 수업 중 놓친 단계를 따라잡는 스크립트 |
-| `Makefile` | `make test` · `make serve` · `make experiment` |
+| `Makefile` | `make test` · `make serve` · `make experiment` · `make compare` |
 
 정답 코드는 들어 있지 않습니다. 에이전트는 작업 공간의 파일을 읽으므로, 정답이
 옆에 있으면 그대로 베껴 와서 연습이 되지 않습니다.
@@ -35,7 +37,9 @@
 | --- | --- |
 | 테스트 | `make test` |
 | 웹 서버 (포트 8000) | `make serve` |
-| 충돌 실험 | `make experiment` |
+| 체이닝 탐지 실험 | `make experiment` |
+| 체이닝·선형 탐지 비교 | `make compare` |
+| 선형 탐지 방식으로 서버 실행 | `make serve TABLE=linear` |
 | 놓친 단계 따라잡기 | `sh tools/catchup.sh <단계 번호>` |
 
 외부 라이브러리는 쓰지 않습니다. Python 표준 모듈만으로 충분합니다.

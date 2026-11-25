@@ -7,6 +7,8 @@ import json
 from urllib.parse import urlsplit
 
 from src import shortener
+from src.hash_table import HashTable
+from src.linear_probing_hash_table import LinearProbingHashTable
 
 
 DEFAULT_HOST = "0.0.0.0"
@@ -113,6 +115,8 @@ class ShortenerRequestHandler(BaseHTTPRequestHandler):
     def _table_page(self) -> bytes:
         buckets = shortener.url_table_snapshot()
         capacity = len(buckets)
+        linear_slots = shortener.linear_table_snapshot()
+        linear_capacity = len(linear_slots)
         parts = [
             "<!doctype html>",
             '<html lang="ko"><head><meta charset="utf-8">',
@@ -135,8 +139,11 @@ class ShortenerRequestHandler(BaseHTTPRequestHandler):
               code { overflow-wrap: anywhere; }
             </style></head><body>""",
             "<h1>현재 해시 테이블</h1>",
-            '<p>URL 키를 호너 방식으로 해시한 버킷과 체이닝 순서입니다.</p>',
+            '<p><a href="#chaining-table">체이닝 방식</a> · '
+            '<a href="#linear-probing-table">선형 탐지 방식</a></p>',
             '<p><a href="/">URL 단축기로 돌아가기</a></p>',
+            '<h2 id="chaining-table">개별 체이닝</h2>',
+            '<p>URL 키를 호너 방식으로 해시한 버킷과 연결 리스트입니다.</p>',
             "<table><thead><tr><th>칸</th><th>연결 리스트 (head → tail)</th>",
             "</tr></thead><tbody>",
         ]
@@ -168,6 +175,45 @@ class ShortenerRequestHandler(BaseHTTPRequestHandler):
                 parts.append("</div>")
             parts.append("</td></tr>")
 
+        parts.extend(
+            [
+                "</tbody></table>",
+                '<h2 id="linear-probing-table">선형 탐지</h2>',
+                '<p>충돌하면 다음 칸으로 이동하고, 마지막 칸 다음에는 0번 칸으로 '
+                "돌아갑니다.</p>",
+                "<table><thead><tr><th>칸</th><th>저장된 항목</th></tr></thead><tbody>",
+            ]
+        )
+        for slot_index, entry in enumerate(linear_slots):
+            parts.append(
+                f"<tr><th scope=\"row\">{slot_index}</th><td>"
+            )
+            if entry is None:
+                parts.append('<span class="empty">비어 있음</span>')
+            else:
+                url, code = entry
+                safe_url = html.escape(url, quote=True)
+                safe_code = html.escape(code, quote=True)
+                short_url = html.escape(self._short_url(code), quote=True)
+                parts.extend(
+                    [
+                        '<section class="node">',
+                        f"<p><strong>URL 키</strong>: <code>{safe_url}</code></p>",
+                        f"<p><strong>짧은 코드</strong>: <code>{safe_code}</code></p>",
+                        f'<p><strong>짧은 링크</strong>: <a href="{short_url}">'
+                        f"{short_url}</a></p>",
+                        self._hash_details(
+                            url,
+                            linear_capacity,
+                            shortener.linear_probe_indices(url)[0],
+                        ),
+                        self._linear_probe_details(
+                            url, linear_capacity, slot_index, linear_slots
+                        ),
+                        "</section>",
+                    ]
+                )
+            parts.append("</td></tr>")
         parts.extend(["</tbody></table></body></html>"])
         return "\n".join(parts).encode("utf-8")
 
@@ -187,8 +233,40 @@ class ShortenerRequestHandler(BaseHTTPRequestHandler):
             )
         return (
             "<details><summary>호너 해시 계산 펼치기 "
-            f"(최종 인덱스: {bucket_index})</summary>"
+                f"(호너 해시 결과: {bucket_index})</summary>"
             f"<p>h₀ = 0, 문자 수 = {len(key)}</p><ol>{''.join(steps)}</ol></details>"
+        )
+
+    @staticmethod
+    def _linear_probe_details(
+        key: str,
+        capacity: int,
+        target_index: int,
+        slots: tuple[tuple[str, str] | None, ...],
+    ) -> str:
+        indices = shortener.linear_probe_indices(key)
+        home_index = indices[0]
+        steps = []
+        for offset, slot_index in enumerate(indices):
+            entry = slots[slot_index]
+            if slot_index == target_index:
+                comparison = "URL 키가 일치합니다."
+            elif entry is None:
+                comparison = "빈 칸입니다."
+            else:
+                comparison = (
+                    "이미 저장된 URL 키 "
+                    f"<code>{html.escape(entry[0], quote=True)}</code>와 다릅니다."
+                )
+            steps.append(
+                "<li>"
+                f"({home_index} + {offset}) mod {capacity} = {slot_index}: "
+                f"{comparison}</li>"
+            )
+        return (
+            "<details><summary>선형 탐지 순서와 비교 근거 펼치기</summary>"
+            f"<p>시작 칸 h = {home_index}; 다음 칸은 (h + i) mod {capacity}입니다.</p>"
+            f"<ol>{''.join(steps)}</ol></details>"
         )
 
     def do_GET(self) -> None:
@@ -286,8 +364,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run the URL shortener.")
     parser.add_argument("--host", default=DEFAULT_HOST)
     parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument(
+        "--table",
+        choices=("chaining", "linear"),
+        default="chaining",
+        help="table implementation used by the shortener",
+    )
     args = parser.parse_args()
 
+    table_class = (
+        HashTable if args.table == "chaining" else LinearProbingHashTable
+    )
+    shortener.configure_table_type(table_class)
     server = create_server(args.host, args.port)
     display_host = "127.0.0.1" if args.host == DEFAULT_HOST else args.host
     print(f"Serving on http://{display_host}:{server.server_port}", flush=True)
